@@ -18,7 +18,7 @@ internal sealed class MainForm : Form
     readonly SoftButton start=new(){Primary=true,Text="开始静享"};
     readonly System.Windows.Forms.Timer signals=new(){Interval=200};
     readonly System.Windows.Forms.Timer bootTimer=new(){Interval=2000};
-    readonly EventWaitHandle restoreSignal,quitSignal;
+    readonly EventWaitHandle restoreSignal,openSignal,quitSignal;
     readonly UiTween appearance;
     readonly bool preview;
     bool hiddenLaunch,closing,cleaned,hotkey,loading=true;
@@ -112,10 +112,12 @@ internal sealed class MainForm : Form
         tray=new NotifyIcon{Icon=appIcon,Text="留景",Visible=true,ContextMenuStrip=menu};
         tray.DoubleClick+=(_,_)=>OpenSettings();
         restoreSignal=new EventWaitHandle(false,EventResetMode.AutoReset,Program.SignalName);
+        openSignal=new EventWaitHandle(false,EventResetMode.AutoReset,Program.OpenSignalName);
         quitSignal=new EventWaitHandle(false,EventResetMode.AutoReset,Program.QuitSignalName);
         signals.Tick+=(_,_)=>{
             if(quitSignal.WaitOne(0)){Exit();return;}
             if(restoreSignal.WaitOne(0)){engine.Pause();OpenSettings();}
+            if(openSignal.WaitOne(0)){OpenSettings();}
         };
         signals.Start();
         engine.Changed+=RefreshStatus;
@@ -227,7 +229,7 @@ internal sealed class MainForm : Form
     {
         if(disposing&&!cleaned){
             cleaned=true;signals.Dispose();bootTimer.Dispose();appearance.Dispose();
-            restoreSignal.Dispose();quitSignal.Dispose();if(hotkey)Native.UnregisterHotKey(Handle,1);
+            restoreSignal.Dispose();openSignal.Dispose();quitSignal.Dispose();if(hotkey)Native.UnregisterHotKey(Handle,1);
             try{engine.Dispose();}finally{tray.Visible=false;tray.Dispose();appIcon.Dispose();}
         }
         base.Dispose(disposing);

@@ -5,6 +5,7 @@ namespace WallpaperQuiet;
 internal static class Program
 {
     public static string SignalName=>@"Local\WallpaperQuiet.Restore."+Environment.UserName;
+    public static string OpenSignalName=>@"Local\WallpaperQuiet.Open."+Environment.UserName;
     public static string QuitSignalName=>@"Local\WallpaperQuiet.Quit."+Environment.UserName;
     [STAThread]
     static int Main(string[] args)
@@ -57,7 +58,9 @@ internal static class Program
         using var mutex=new Mutex(true,@"Local\WallpaperQuiet.Instance."+Environment.UserName,out bool fresh);
         if(!fresh){
             if(loginLaunch)StartupLog.Write("Existing instance retained.");
-            if(!args.Contains("--startup"))try{using var signal=EventWaitHandle.OpenExisting(SignalName);signal.Set();}catch{}
+            // Opening an already-running app should show its settings without
+            // interrupting quiet mode. --restore retains its pause behavior.
+            if(!args.Contains("--startup"))try{using var signal=EventWaitHandle.OpenExisting(OpenSignalName);signal.Set();}catch{}
             return 0;
         }
         MainForm? main=null;

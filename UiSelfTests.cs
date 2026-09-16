@@ -58,6 +58,8 @@ internal static class UiSelfTests
             Check(defaults.StartupAutoStart,"startup defaults to automatic quiet mode");
             Check(defaults.IdleSeconds==5&&defaults.FadeMs==600&&defaults.Icons&&defaults.Taskbar&&!defaults.DesktopOnly&&defaults.Motion,
                 "new installs use the tested five-second quiet configuration");
+            Check(Program.OpenSignalName!=Program.SignalName&&Program.OpenSignalName!=Program.QuitSignalName,
+                "opening settings has a separate signal and cannot pause quiet mode");
             var monitor=new Rectangle(0,0,1920,1080);
             Check(FullscreenPolicy.Blocks(false,true,new Rectangle(0,0,1920,1032),monitor),"maximized browser with reserved taskbar area blocks fade");
             Check(FullscreenPolicy.Blocks(false,false,monitor,monitor),"borderless full-screen blocks fade");
