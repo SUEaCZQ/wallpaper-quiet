@@ -22,14 +22,16 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Application publish failed.' }
     # Preserve the license and third-party notices from the bundled runtime packs.
     $assets = Get-Content (Join-Path $root 'obj\project.assets.json') -Raw | ConvertFrom-Json
+    $runtimeConfig = Get-Content (Join-Path $publish 'WallpaperQuiet.runtimeconfig.json') -Raw | ConvertFrom-Json
     $licenseDir = Join-Path $publish 'licenses'
     New-Item -ItemType Directory -Force -Path $licenseDir | Out-Null
     foreach ($pack in @('microsoft.netcore.app.runtime.win-x64', 'microsoft.windowsdesktop.app.runtime.win-x64')) {
-        $library = $assets.libraries.PSObject.Properties | Where-Object { $_.Name.ToLowerInvariant().StartsWith($pack + '/') } | Select-Object -First 1
-        if (-not $library) { throw "Runtime package metadata is missing: $pack" }
+        $frameworkName = if ($pack.Contains('windowsdesktop')) { 'Microsoft.WindowsDesktop.App' } else { 'Microsoft.NETCore.App' }
+        $framework = $runtimeConfig.runtimeOptions.includedFrameworks | Where-Object { $_.name -eq $frameworkName }
+        if (-not $framework) { throw "Bundled framework metadata is missing: $frameworkName" }
         $packageDir = $null
         foreach ($folder in $assets.packageFolders.PSObject.Properties.Name) {
-            $candidate = Join-Path $folder $library.Value.path
+            $candidate = Join-Path $folder ($pack + '/' + $framework.version)
             if (Test-Path -LiteralPath $candidate) { $packageDir = $candidate; break }
         }
         if (-not $packageDir) { throw "Runtime package is missing: $pack" }
