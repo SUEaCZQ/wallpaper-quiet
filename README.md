@@ -1,90 +1,103 @@
-# 留景 1.3.0 · 桌面静享
+<p align="center">
+  <img src="Assets/App-cropped.png" width="120" alt="留景图标">
+</p>
 
-鼠标和键盘空闲一段时间后，桌面图标与任务栏渐隐；移动鼠标或按键即可恢复。适配本机 Wallpaper Engine 的实时合成图层，不用静态截图覆盖动态壁纸。
+<h1 align="center">留景</h1>
 
-## 使用
+<p align="center">WallpaperQuiet · 把桌面留给壁纸。</p>
+<p align="center">停下操作，桌面图标与任务栏轻轻隐去；移动鼠标或按下键盘，它们便重新出现。</p>
 
-双击「留景」快捷方式，调整设置后点击「开始静享」。手动打开的设置窗口会保留在屏幕上；桌面图标和任务栏仍会按空闲时间渐隐。登录启动后再次双击应用，也只会打开设置并保持静享。关闭窗口可将它收起到系统托盘。双击托盘图标打开设置。
+<p align="center">
+  <img src="docs/assets/settings-demo.gif" width="960" alt="设置窗口保持打开时，桌面图标和任务栏仍可渐隐与恢复">
+  <br><sub>设置窗口保持打开，也能继续静享。</sub>
+</p>
 
-- 「时间与过渡」：空闲等待时间和渐隐时长。
-- 「显示与启动」：桌面图标、任务栏、仅在桌面时运行、渐变、开机自启动。
-- 时间和显示设置在「开始静享 / 保存并继续」时应用。打开设置不会暂停已经开始的静享。
-- 开机自启动开关立即保存。
-- 右上角关闭按钮收起到托盘；「退出应用」会退出并恢复桌面。
-- Ctrl + Alt + F12、「恢复桌面」快捷方式和托盘菜单均可恢复并暂停；它们与“打开设置”是不同操作。
+<p align="center">
+  <img src="docs/assets/desktop-demo.gif" width="960" alt="桌面图标与任务栏渐隐，动态壁纸持续播放；输入后恢复桌面">
+  <br><sub>让动态壁纸继续流动，让桌面在需要时回来。</sub>
+</p>
 
-## 全屏与最大化保护
+<p align="center">
+  <a href="https://github.com/SUEaCZQ/wallpaper-quiet/releases/latest"><strong>下载安装包</strong></a>
+  &nbsp; · &nbsp;
+  <a href="https://github.com/SUEaCZQ/wallpaper-quiet/releases/download/v1.3.1/wallpaper-quiet-1.3.1-source.zip">下载源码</a>
+  &nbsp; · &nbsp;
+  <a href="https://github.com/SUEaCZQ/wallpaper-quiet/issues">反馈问题</a>
+</p>
 
-检查所有屏幕上的应用窗口：只要有应用全屏、无边框全屏或最大化，留景就不再渐隐桌面图标和任务栏。即使它在微信等普通窗口后面，也会触发保护。已渐隐的元素在检测到后立即恢复。所有符合条件的窗口都还原、最小化或关闭后，才重新计算空闲时间。
+## 安静，但随时可用
 
-排除已隐藏、已最小化和系统标记为不可见的窗口（例如其他虚拟桌面上的窗口），以及桌面、任务栏、动态壁纸图层和透明且允许鼠标穿透的覆盖层。被其他窗口遮挡的应用仍参与检测。
+- **空闲渐隐，输入恢复**：分别控制桌面图标和任务栏，调整等待时间与渐隐时长。
+- **动态壁纸持续播放**：直接调整桌面合成图层的透明度，不用静态截图覆盖 Wallpaper Engine。
+- **设置窗口也能静享**：打开设置不会暂停已经开启的静享；关闭窗口则收起到托盘。
+- **全屏与最大化保护**：检查所有屏幕上的应用，而不只检查前台窗口。任何可见应用全屏、无边框全屏或最大化时，都保持桌面与任务栏显示。
+- **登录后自动运行**：可以随 Windows 登录收起到托盘，并自动开启静享。
+- **随时恢复**：按 `Ctrl + Alt + F12` 或使用托盘菜单，恢复桌面并暂停静享。正常退出也会恢复桌面。
 
-这个保护始终生效，即使关闭了「仅在桌面时运行」也有效。窗口占半屏的分屏布局不被当作全屏。支持位于负坐标的副屏。
+## 下载与安装
 
-留景只管理自己的透明度变化，不改变浏览器全屏模式本身或 Windows 的任务栏自动隐藏设置。
+在 [Releases](https://github.com/SUEaCZQ/wallpaper-quiet/releases/latest) 下载：
 
-## 开机自启动
+| 文件 | 用途 |
+| --- | --- |
+| `WallpaperQuiet-1.3.1-Setup-x64.exe` | Windows 64 位安装包，内置 .NET 桌面运行环境，无需另行安装运行库 |
+| `wallpaper-quiet-1.3.1-source.zip` | 此版本的源代码、图标、演示与构建脚本 |
+| `SHA256SUMS.txt` | 安装包与源码包的 SHA-256 校验值 |
 
-启用「开机自启动」后，留景会创建 Windows 当前用户的登录任务：登录后等待 10 秒，收起到托盘，并自动开启静享。
+1. 运行安装包，按向导安装到当前用户的应用目录，无需管理员权限。
+2. 按需选择「开机自启动」和「桌面快捷方式」。自启动默认勾选，登录后等待 10 秒，在托盘中自动开启静享。
+3. 打开留景，点击「开始静享」。调整设置后，点击「保存并继续」。
 
-- 设置里的开关会读取并验证 Windows 登录任务的实际启用状态。
-- 登录任务使用当前用户的普通权限和交互式会话，不保存密码。
-- 使用电池也允许启动，切换到电池不会停止留景；后台运行没有时长限制。
-- 桌面尚未就绪时每 2 秒重试，最长 2 分钟；日志记录启动、就绪和失败原因。
-- 新任务写入并验证成功后，移除旧的 WallpaperQuiet 注册表 Run 项。
-- 关闭开关会移除本应用的登录任务和遗留 Run 项。
-- 任务计划程序中的名称为 WallpaperQuiet-当前用户 SID，描述为留景登录静享。
-- 启动日志：%LOCALAPPDATA%\WallpaperQuiet\startup.log（限制大小并轮换）。
-- 移动软件后，在新位置重新关闭再开启自启动，以更新路径。
-- 关闭开关后，任务与旧版注册表启动项都会被清理。
+适用于 Windows 10 / 11 x64，主要在 Windows 11 与 Wallpaper Engine 环境验证。安装包目前未进行代码签名。升级安装保留现有设置；卸载会移除属于此安装位置的登录任务，保留个人设置，方便重新安装。
 
-## 界面和动效
+## 默认配置
 
-移除了原来的风景配图，改为紧凑的状态、时间、行为分组。使用用户提供的图标，直接裁掉外围透明留白并保留原有图案和透明圆角，制作了 16、24、32、48、64、128、256 像素的 Windows 图标。
+首次使用的默认值如下；已有用户保留自己的配置。演示中的等待时间可以自行调整。
 
-- 开关过渡：160 毫秒，可在切换中反向。
-- 按钮按压反馈：100～120 毫秒，轻微缩小。
-- 首次打开窗口：180 毫秒淡入。
-- 键盘操作即时响应；遵循系统减少动画设置。
-- 动画计时器在过渡完成后停止。
-- 支持高 DPI 缩放；空间不足时可以滚动。
+| 设置 | 默认值 |
+| --- | --- |
+| 空闲等待 | 5 秒 |
+| 渐隐时长 | 600 毫秒 |
+| 输入后渐现 | 250 毫秒 |
+| 桌面图标 / 任务栏 | 均开启 |
+| 仅在桌面时运行 | 关闭，允许设置窗口保持打开 |
+| 渐隐与渐现 | 开启，并遵循系统减少动画设置 |
+| 登录启动方式 | 收起到托盘，并自动开启静享 |
+| 全屏 / 无边框全屏 / 最大化保护 | 始终开启 |
 
-## 桌面渐隐与恢复保护
+配置保存在 `%LOCALAPPDATA%\WallpaperQuiet\settings.json`。应用内的「开机自启动」开关会立即写入并验证 Windows 当前用户的登录任务，不保存账户密码。
 
-自动渐隐期间只改变透明度，不调用隐藏或显示窗口，不在往返端点反复拆建透明合成层。正常暂停和退出时恢复原始样式和透明度。
+## 保护规则与兼容性
 
-独立恢复进程会在主程序单独异常退出时尝试还原状态。此机制不覆盖两个进程同时被强制结束、系统崩溃或资源管理器自身异常。
+后台被普通窗口遮挡的最大化应用也会触发保护。最小化、隐藏、其他虚拟桌面上被系统标记为不可见的窗口，以及桌面和动态壁纸图层不参与判断。普通半屏分屏窗口不属于全屏。
 
-新安装默认在空闲 5 秒后，以 600 毫秒渐隐（渐现 250 毫秒）；默认同时渐隐桌面图标和任务栏、允许设置窗口保持打开、启用动态过渡和登录自动静享。全屏、无边框全屏和最大化应用仍会始终阻止渐隐。配置保存在 %LOCALAPPDATA%\WallpaperQuiet\settings.json。
+渐隐期间只改变透明度，不反复隐藏、显示或重建桌面窗口；暂停和退出时恢复原始状态。独立恢复进程会在主程序异常退出时尝试还原桌面，但无法覆盖两个进程同时被强制结束、系统崩溃或资源管理器自身异常。
 
-## 验证
+Windows 的桌面窗口层级可能随系统更新变化。不同 Wallpaper Engine 版本、HDR 和所有多屏组合尚未逐一验证；遇到问题可在 Issues 中说明系统版本、显示器情况和复现步骤。
 
-- 23 项原有桌面合成回归检查：包括中途反向、100 次往返、原透明度保留和独立进程恢复。
-- UI、开机启动、全屏判断检查，包括前台普通窗口覆盖后台最大化浏览器的回归场景，以及新安装默认配置。
-- 实际设置窗口渲染与控件越界检查。
-- 模拟开机：窗口保持隐藏、自动静享启用，测试后退出并恢复。
-- 多种 Windows / Wallpaper Engine 版本、HDR 和所有多屏组合未逐一实测。
+## 从源码构建
 
-## 文件与开发
+需要 Windows、[.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)，制作安装包还需要 [Inno Setup 6.7 或更高版本](https://jrsoftware.org/isdl.php)。
 
-使用 `dotnet publish` 后，发布目录中的文件必须保留在同一个文件夹中；移动软件后，请在新位置重新关闭再打开一次「开机自启动」。
+```powershell
+# 编译应用
+dotnet build -c Release
+
+# 桌面合成、UI、登录启动和全屏判断检查
+.\bin\Release\net10.0-windows\WallpaperQuiet.exe --self-test
+.\bin\Release\net10.0-windows\WallpaperQuiet.exe --ui-tests
+
+# 生成包含运行环境的 x64 安装包
+.\scripts\build-release.ps1 -IsccPath 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
+
+# 从已提交的版本生成源码 ZIP 与校验文件（需要 Git 仓库）
+.\scripts\package-source.ps1 -Ref HEAD
+```
+
+产物位于 `artifacts/release/`。源码包从指定 Git 提交生成，仅包含已跟踪文件，不打包本机配置、日志、快捷方式、历史备份、编译缓存或 Git 凭据。
+
+其他命令：`--diagnose-protection` 查看当前保护原因；`--restore` 恢复并暂停；`--quit` 正常退出。请在应用中更改自启动设置；手动移动程序后，应在新位置重新关闭再开启自启动。
 
 ## 开源许可
 
-本项目以 MIT License 发布。详见 [LICENSE](LICENSE)。
-
-- 构建：dotnet build -c Release
-- 发布：dotnet publish -c Release --no-self-contained -o 运行程序
-- 原有测试：WallpaperQuiet.exe --self-test
-- UI / 启动 / 全屏测试：WallpaperQuiet.exe --ui-tests
-- 只读检查当前保护原因：WallpaperQuiet.exe --diagnose-protection
-- 模拟启动：关闭已运行实例后，WallpaperQuiet.exe --startup-smoke
-- 导出设置窗口：WallpaperQuiet.exe --render preview.png
-- 恢复暂停：WallpaperQuiet.exe --restore
-- 正常退出：WallpaperQuiet.exe --quit
-
-依赖 .NET 10 Windows Desktop Runtime，本机已安装。Windows 桌面窗口层级并非稳定的公开扩展接口，后续系统更新可能需要适配。
-
-参考：
-https://learn.microsoft.com/en-us/windows/win32/setupapi/run-and-runonce-registry-keys
-
+代码采用 [MIT License](LICENSE)。欢迎提交问题与改进。演示中的壁纸及第三方软件标识归各自权利人所有，演示素材不代表随本项目授予其使用许可。

@@ -19,3 +19,6 @@ validation/
 # A versioned icon file was only used by a local shortcut during development.
 Assets/App-v122.ico
 crop-icon.py
+
+# Release packages and local build tools
+artifacts/
