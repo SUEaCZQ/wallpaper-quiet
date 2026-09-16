@@ -1,0 +1,21 @@
+# Build and published binaries
+[Bb]in/
+[Oo]bj/
+运行程序/
+旧版备份*/
+
+# Local shortcuts, validation captures, and command output
+*.lnk
+*.txt
+preview*.png
+validation/
+
+# Local editor files
+.vs/
+.idea/
+*.user
+*.suo
+
+# A versioned icon file was only used by a local shortcut during development.
+Assets/App-v122.ico
+crop-icon.py
