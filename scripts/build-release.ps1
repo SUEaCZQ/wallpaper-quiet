@@ -20,6 +20,25 @@ try {
         -p:DebugType=None -p:DebugSymbols=false -p:ContinuousIntegrationBuild=true `
         -p:Deterministic=true -o $publish --nologo
     if ($LASTEXITCODE -ne 0) { throw 'Application publish failed.' }
+    # Preserve the license and third-party notices from the bundled runtime packs.
+    $assets = Get-Content (Join-Path $root 'obj\project.assets.json') -Raw | ConvertFrom-Json
+    $licenseDir = Join-Path $publish 'licenses'
+    New-Item -ItemType Directory -Force -Path $licenseDir | Out-Null
+    foreach ($pack in @('microsoft.netcore.app.runtime.win-x64', 'microsoft.windowsdesktop.app.runtime.win-x64')) {
+        $library = $assets.libraries.PSObject.Properties | Where-Object { $_.Name.ToLowerInvariant().StartsWith($pack + '/') } | Select-Object -First 1
+        if (-not $library) { throw "Runtime package metadata is missing: $pack" }
+        $packageDir = $null
+        foreach ($folder in $assets.packageFolders.PSObject.Properties.Name) {
+            $candidate = Join-Path $folder $library.Value.path
+            if (Test-Path -LiteralPath $candidate) { $packageDir = $candidate; break }
+        }
+        if (-not $packageDir) { throw "Runtime package is missing: $pack" }
+        $notices = @(Get-ChildItem -LiteralPath $packageDir -File | Where-Object { $_.Name -match '^(LICENSE(?:\.TXT)?|THIRD-PARTY-NOTICES\.TXT)$' })
+        if (-not $notices) { throw "Runtime license is missing: $pack" }
+        foreach ($notice in $notices) {
+            Copy-Item -LiteralPath $notice.FullName -Destination (Join-Path $licenseDir ($pack + '-' + $notice.Name))
+        }
+    }
     & $IsccPath "/DAppVersion=$version" "/DPublishDir=$publish" "/DReleaseDir=$release" `
         (Join-Path $root 'packaging\WallpaperQuiet.iss')
     if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed.' }
