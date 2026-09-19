@@ -29,16 +29,20 @@ internal static class Program
         AppDomain.CurrentDomain.UnhandledException+=(_,e)=>StartupLog.Write("Unhandled: "+e.ExceptionObject);
         ApplicationConfiguration.Initialize();
         if(args.Contains("--ui-tests"))return UiSelfTests.Run();
+        if(args.Contains("--split-screen-test"))return UiSelfTests.RunNativeSplitScreen();
         if(args.Contains("--validate-live"))return LiveValidation.Run();
         if(args.Contains("--self-test"))return SelfTests.Run();
         if(args.Contains("--diagnose-protection")){
             var windows=FullscreenPolicy.ReadWindows().ToArray();
             var foreground=Native.GetAncestor(Native.GetForegroundWindow(),2);
             var blockers=windows.Where(FullscreenPolicy.Blocks).ToArray();
-            Console.WriteLine("Protection active: "+(blockers.Length>0));
+            var displays=FullscreenPolicy.ReadDisplays();
+            Console.WriteLine("Protection active: "+FullscreenPolicy.AnyWindowBlocksQuiet(windows,displays));
             Console.WriteLine("Foreground handle: "+foreground);
             foreach(var w in blockers)
                 Console.WriteLine($"Blocker: handle={w.Handle} class={w.ClassName} maximized={w.Maximized} foreground={w.Handle==foreground} bounds={w.Bounds} monitor={w.Monitor}");
+            foreach(var display in displays.Where(d=>FullscreenPolicy.DisplayCovered(windows,d)))
+                Console.WriteLine($"Applications cover display: bounds={display.Bounds} workingArea={display.WorkingArea}");
             var watch=Stopwatch.StartNew();
             for(int i=0;i<100;i++)FullscreenPolicy.AnyWindowBlocksQuiet();
             Console.WriteLine($"Mean scan time: {watch.Elapsed.TotalMilliseconds/100:F3} ms");

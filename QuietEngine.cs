@@ -152,7 +152,7 @@ internal sealed class QuietEngine : IDisposable
                 // The first tick after an instant/finished restore still sets the endpoint.
                 foreach(var w in windows) w.Apply(1);
             }
-            string status=SettingsOpen ? "设置期间保持显示" : fullscreen ? "全屏或最大化时保持显示" : !eligible ? "等待回到桌面"
+            string status=SettingsOpen ? "设置期间保持显示" : fullscreen ? "屏幕被应用占满，保持显示" : !eligible ? "等待回到桌面"
                 : fade.Target==0 ? (fade.Value==0 ? "正在欣赏壁纸" : "正在渐隐")
                 : fade.Value<1 ? "正在渐现" : "等待空闲";
             if(Status!=status || Remaining!=remaining) {

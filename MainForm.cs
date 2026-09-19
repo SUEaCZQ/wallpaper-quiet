@@ -90,7 +90,7 @@ internal sealed class MainForm : Form
         options.Controls.Add(SettingRow("开机自启动",settings.StartupAutoStart?"登录后收起到托盘，自动开启静享。":"登录后收起到托盘，等待手动开启。",autoRun,168,56,588));
         foreach(int y in new[]{56,112,168})AddDivider(options,y);
         root.Controls.Add(options,0,7);
-        root.Controls.Add(new Label{Text="任意应用全屏或最大化时，保持桌面显示。",Dock=DockStyle.Fill,Font=new Font(Font.FontFamily,8),ForeColor=UiTheme.Muted,TextAlign=ContentAlignment.MiddleLeft,Margin=new Padding(1,2,0,0)},0,8);
+        root.Controls.Add(new Label{Text="应用全屏、最大化或分屏占满屏幕时，保持桌面显示。",Dock=DockStyle.Fill,Font=new Font(Font.FontFamily,8),ForeColor=UiTheme.Muted,TextAlign=ContentAlignment.MiddleLeft,Margin=new Padding(1,2,0,0)},0,8);
 
         var actions=new TableLayoutPanel{Dock=DockStyle.Fill,Margin=Padding.Empty,ColumnCount=2};
         actions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));actions.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute,168));

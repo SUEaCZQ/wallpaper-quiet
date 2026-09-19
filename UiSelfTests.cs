@@ -86,9 +86,95 @@ internal static class UiSelfTests
             Check(!FullscreenPolicy.AnyWindowBlocksQuiet([]),"closing all windows releases protection");
             Check(!FullscreenPolicy.AnyWindowBlocksQuiet([chat,borderless with {ClickThroughOverlay=true}]),"transparent click-through cursor overlay does not block desktop quiet mode");
             Check(FullscreenPolicy.AnyWindowBlocksQuiet([browser,borderless with {ClickThroughOverlay=true}]),"ignoring overlays still protects a maximized app underneath");
+            CoverageTests();
             Console.WriteLine("SUCCESS: "+count+" UI/startup/fullscreen checks. No startup registry entries modified.");
             return 0;
         }catch(Exception ex){Console.WriteLine(ex);return 1;}
+    }
+
+    sealed class CoverageWindow:Form
+    {
+        protected override bool ShowWithoutActivation=>true;
+        public CoverageWindow(Rectangle bounds)
+        {
+            FormBorderStyle=FormBorderStyle.None;ShowInTaskbar=false;
+            StartPosition=FormStartPosition.Manual;Bounds=bounds;
+        }
+    }
+
+    public static int RunNativeSplitScreen()
+    {
+        try{
+            var screen=Screen.PrimaryScreen??Screen.AllScreens[0];
+            var work=screen.WorkingArea;
+            var display=new FullscreenPolicy.DisplayInfo(screen.Bounds,work);
+            int middle=work.Left+work.Width/2;
+            using var left=new CoverageWindow(Rectangle.FromLTRB(work.Left,work.Top,middle,work.Bottom));
+            using var right=new CoverageWindow(Rectangle.FromLTRB(middle,work.Top,work.Right,work.Bottom));
+            using var lower=new CoverageWindow(Rectangle.FromLTRB(middle,work.Top+work.Height/2,work.Right,work.Bottom));
+            left.Show();right.Show();Application.DoEvents();
+            var handles=new HashSet<nint>{left.Handle,right.Handle,lower.Handle};
+            bool Covered()=>FullscreenPolicy.AnyWindowBlocksQuiet(FullscreenPolicy.ReadWindows().Where(w=>handles.Contains(w.Handle)),[display]);
+            Check(Covered(),"native borderless half-screen windows jointly protect working area");
+            right.Hide();Application.DoEvents();
+            Check(!Covered(),"hiding a native split window releases protection");
+            right.Bounds=Rectangle.FromLTRB(middle,work.Top,work.Right,work.Top+work.Height/2);
+            right.Show();Application.DoEvents();
+            Check(!Covered(),"native split with uncovered quadrant is not full coverage");
+            lower.Show();Application.DoEvents();
+            Check(Covered(),"three native windows complete coverage without maximization");
+            Console.WriteLine("SUCCESS: native split-screen validation; only test windows were opened and disposed.");
+            return 0;
+        }catch(Exception ex){Console.WriteLine(ex);return 1;}
+    }
+
+    static void CoverageTests()
+    {
+        var bounds=new Rectangle(0,0,1920,1080);
+        var work=new Rectangle(0,0,1920,1032);
+        var display=new FullscreenPolicy.DisplayInfo(bounds,work);
+        FullscreenPolicy.WindowInfo App(Rectangle r,int id=1) => new(id,"TestApp",true,false,false,false,r,bounds);
+        bool Protected(params FullscreenPolicy.WindowInfo[] windows) => FullscreenPolicy.AnyWindowBlocksQuiet(windows,[display]);
+        var left=App(new Rectangle(0,0,960,1032));
+        var right=App(new Rectangle(960,0,960,1032),2);
+        Check(Protected(left,right),"REGRESSION: two snapped halves cover working area despite reserved taskbar space");
+        Check(Protected(right,left),"split-screen coverage is independent of foreground and stacking order");
+        Check(Protected(App(new Rectangle(0,0,1920,516)),App(new Rectangle(0,516,1920,516))),"top and bottom split protects desktop");
+        Check(Protected(left,App(new Rectangle(960,0,960,516)),App(new Rectangle(960,516,960,516))),"three-window snap layout protects desktop");
+        Check(Protected(App(new Rectangle(0,0,960,516)),App(new Rectangle(960,0,960,516)),App(new Rectangle(0,516,960,516)),App(new Rectangle(960,516,960,516))),"four quadrants protect desktop");
+        Check(Protected(App(work)),"manually sized app filling work area protects without maximized flag");
+        Check(!Protected(left),"one snapped half leaves wallpaper available");
+        Check(!Protected(left,left,left),"overlapping copies of one half never add up to full coverage");
+        Check(!Protected(App(new Rectangle(0,0,960,516)),App(new Rectangle(960,516,960,516))),"diagonal windows leave holes despite full bounding box");
+        Check(!Protected(left,App(new Rectangle(972,0,948,1032))),"visible gap between split windows does not count as full coverage");
+        Check(!Protected(left,right with {Minimized=true}),"minimizing one split window releases protection");
+        Check(!Protected(left,right with {Visible=false}),"hidden split window does not fill missing half");
+        Check(!Protected(left,right with {Cloaked=true}),"another virtual desktop cannot complete split coverage");
+        Check(!Protected(left,right with {ClickThroughOverlay=true}),"click-through overlay cannot complete split coverage");
+        Check(!Protected(left,right with {ClassName="WPEDesktopDX11Window"}),"wallpaper cannot complete split coverage");
+        Check(!Protected(left,right with {ClassName="Shell_TrayWnd"}),"taskbar is not counted as an application");
+        Check(Protected(App(new Rectangle(1,1,958,1030)),App(new Rectangle(961,1,958,1030))),"minor frame rounding does not break split-screen protection");
+        var second=new FullscreenPolicy.DisplayInfo(new Rectangle(-1920,0,1920,1080),new Rectangle(-1920,0,1920,1032));
+        Check(FullscreenPolicy.AnyWindowBlocksQuiet([App(new Rectangle(-1920,0,960,1032)),App(new Rectangle(-960,0,960,1032))],[display,second]),"split layout on negative-coordinate secondary display protects globally");
+        Check(!FullscreenPolicy.AnyWindowBlocksQuiet([left,App(new Rectangle(-960,0,960,1032))],[display,second]),"halves on different screens cannot be added together");
+        Check(FullscreenPolicy.AnyWindowBlocksQuiet([App(new Rectangle(-1920,0,2500,1032)),App(new Rectangle(580,0,1340,1032))],[display]),"window spanning screens is clipped into each display regardless of assigned monitor");
+        var sideTaskbar=new FullscreenPolicy.DisplayInfo(bounds,new Rectangle(48,0,1872,1080));
+        Check(FullscreenPolicy.AnyWindowBlocksQuiet([App(new Rectangle(48,0,936,1080)),App(new Rectangle(984,0,936,1080))],[sideTaskbar]),"vertical taskbar is excluded from required coverage");
+        Check(FullscreenPolicy.AnyWindowBlocksQuiet([App(new Rectangle(0,0,960,1080)),App(new Rectangle(960,0,960,1080))],[new(bounds,bounds)]),"auto-hidden taskbar layout uses full monitor area");
+        Check(!FullscreenPolicy.AreaCovered([Rectangle.Empty],work)&&!FullscreenPolicy.AreaCovered([work],Rectangle.Empty),"invalid coverage rectangles are ignored");
+
+        // An independent pixel-grid oracle catches holes and overlapping intervals.
+        var random=new Random(132);
+        var grid=new Rectangle(0,0,16,12);
+        bool agrees=true;
+        for(int sample=0;sample<300;sample++){
+            var rects=Enumerable.Range(0,random.Next(0,9)).Select(_=>new Rectangle(random.Next(-4,20),random.Next(-4,16),random.Next(1,20),random.Next(1,16))).ToArray();
+            bool raster=true;
+            for(int y=0;y<12;y++)for(int x=0;x<16;x++)
+                raster &= rects.Any(r=>x>=r.Left-2&&x<r.Right+2&&y>=r.Top-2&&y<r.Bottom+2);
+            agrees &= raster==FullscreenPolicy.AreaCovered(rects,grid);
+        }
+        Check(agrees,"coverage matches independent pixel oracle in 300 overlapping and gapped layouts");
     }
 }
 
